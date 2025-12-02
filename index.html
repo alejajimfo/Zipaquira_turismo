@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Plataforma Turística Zipaquirá - Descubre la Ciudad de la Sal, Colombia. Catedral de Sal, turismo, gastronomía y más.">
+    <meta name="keywords" content="Zipaquirá, turismo, Catedral de Sal, Colombia, viajes">
+    <meta name="author" content="Zipaquirá Turística">
+    
+    <title>Zipaquirá Turística - Ciudad de la Sal | Colombia</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+    
+    <!-- Font Awesome - Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Google Fonts (Opcional) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos adicionales inline para optimización */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        /* Loader inicial */
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0066cc, #00509e);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .loader-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loader-text {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Animación de entrada */
+        #app {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Mejora de rendimiento */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader inicial mientras carga la aplicación -->
+    <div id="loader" class="loader-container">
+        <div class="loader"></div>
+        <p class="loader-text">Cargando Zipaquirá Turística...</p>
+    </div>
+
+    <!-- Contenedor principal de la aplicación React -->
+    <div id="app"></div>
+    
+    <!-- Mensaje de error si JavaScript está deshabilitado -->
+    <noscript>
+        <div style="text-align: center; padding: 2rem; background: #fff3cd; color: #856404; margin: 2rem;">
+            <h2>⚠️ JavaScript Requerido</h2>
+            <p>Esta aplicación requiere JavaScript para funcionar correctamente.</p>
+            <p>Por favor habilita JavaScript en tu navegador.</p>
+        </div>
+    </noscript>
+
+    <!-- React - Biblioteca principal -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Aplicación principal -->
+    <script src="app.js"></script>
+    
+    <!-- Script para ocultar loader -->
+    <script>
+        // Ocultar loader cuando la página termine de cargar
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.classList.add('hidden');
+                    setTimeout(function() {
+                        loader.style.display = 'none';
+                    }, 500);
+                }
+            }, 500);
+        });
+        
+        // Manejo de errores global
+        window.addEventListener('error', function(e) {
+            console.error('Error en la aplicación:', e.error);
+        });
+        
+        // Configuración de la aplicación
+        window.APP_CONFIG = {
+            apiUrl: window.location.origin + '/zipaquira-turismo/api',
+            version: '1.0.0',
+            environment: 'production'
+        };
+        
+        // Service Worker para PWA (opcional - descomentar si se implementa)
+        /*
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/zipaquira-turismo/sw.js')
+                    .then(reg => console.log('Service Worker registrado'))
+                    .catch(err => console.log('Error al registrar SW:', err));
+            });
+        }
+        */
+    </script>
+    
+    <!-- Google Analytics (opcional - reemplazar con tu ID) -->
+    <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    -->
+    
+    <!-- Meta tags adicionales para redes sociales -->
+    <meta property="og:title" content="Zipaquirá Turística - Ciudad de la Sal">
+    <meta property="og:description" content="Descubre Zipaquirá y la majestuosa Catedral de Sal. Primera maravilla de Colombia.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tudominio.com">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1200&h=630&fit=crop">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Zipaquirá Turística - Ciudad de la Sal">
+    <meta name="twitter:description" content="Descubre Zipaquirá y la majestuosa Catedral de Sal. Primera maravilla de Colombia.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1200&h=630&fit=crop">
+</body>
+</html>

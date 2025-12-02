@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /zipaquira-turismo/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} !^/zipaquira-turismo/api/
+    RewriteRule ^(.*)$ index.html [L,QSA]
+</IfModule>
+
+<FilesMatch "\.\(htaccess^|htpasswd^|ini^|log^|sh^|sql^|md\)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+Options -Indexes
+AddDefaultCharset UTF-8

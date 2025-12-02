@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mis Servicios - Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        h2 { color: #0066cc; margin-top: 0; }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0052a3; }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border-left: 4px solid #0066cc;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Test Mis Servicios - Debug</h1>
+    
+    <div class="container">
+        <h2>1. Probar API Mis Servicios</h2>
+        <p>Ingresa el ID del usuario para ver sus servicios:</p>
+        <input type="number" id="usuario_id" placeholder="ID Usuario" value="1">
+        <button onclick="testMisServicios()">Probar API</button>
+        <div id="result1"></div>
+    </div>
+
+    <div class="container">
+        <h2>2. Ver Todos los Servicios</h2>
+        <button onclick="testTodosServicios()">Ver Todos</button>
+        <div id="result2"></div>
+    </div>
+
+    <div class="container">
+        <h2>3. Ver Usuarios</h2>
+        <button onclick="testUsuarios()">Ver Usuarios</button>
+        <div id="result3"></div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/zipaquira-turismo/api';
+
+        async function testMisServicios() {
+            const usuario_id = document.getElementById('usuario_id').value;
+            const resultDiv = document.getElementById('result1');
+            
+            resultDiv.innerHTML = '<p class="info">Cargando...</p>';
+            
+            try {
+                const url = `${API_URL}/servicios/mis_servicios.php?usuario_id=${usuario_id}`;
+                console.log('URL:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                console.log('Respuesta:', data);
+                
+                let html = '<h3>Respuesta de la API:</h3>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                if (data.success) {
+                    html += `<p class="success">Total de servicios: ${data.total}</p>`;
+                    
+                    if (data.total > 0) {
+                        html += '<h4>Servicios encontrados:</h4>';
+                        data.data.forEach(servicio => {
+                            html += `<div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 4px;">
+                                <strong>${servicio.nombre_servicio}</strong><br>
+                                RNT: ${servicio.rnt}<br>
+                                Tipo: ${servicio.tipo_servicio}<br>
+                                ID: ${servicio.id}<br>
+                                Usuario ID: ${servicio.usuario_id || 'N/A'}
+                            </div>`;
+                        });
+                    } else {
+                        html += '<p class="info">No hay servicios para este usuario</p>';
+                    }
+                } else {
+                    html += `<p class="error">Error: ${data.message}</p>`;
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testTodosServicios() {
+            const resultDiv = document.getElementById('result2');
+            resultDiv.innerHTML = '<p class="info">Cargando...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/servicios/listar.php`);
+                const data = await response.json();
+                
+                console.log('Todos los servicios:', data);
+                
+                let html = '<h3>Todos los Servicios:</h3>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                if (data.success && data.data.length > 0) {
+                    html += '<h4>Lista de servicios:</h4>';
+                    html += '<table style="width: 100%; border-collapse: collapse;">';
+                    html += '<tr style="background: #f0f0f0;"><th>ID</th><th>Nombre</th><th>Usuario ID</th><th>Tipo</th><th>RNT</th></tr>';
+                    
+                    data.data.forEach(servicio => {
+                        html += `<tr style="border-bottom: 1px solid #ddd;">
+                            <td>${servicio.id}</td>
+                            <td>${servicio.nombre_servicio}</td>
+                            <td>${servicio.usuario_id || 'N/A'}</td>
+                            <td>${servicio.tipo_servicio}</td>
+                            <td>${servicio.rnt}</td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testUsuarios() {
+            const resultDiv = document.getElementById('result3');
+            resultDiv.innerHTML = '<p class="info">Cargando...</p>';
+            
+            try {
+                // Intentar obtener usuarios desde la API
+                const response = await fetch(`${API_URL}/usuarios/listar.php`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let html = '<h3>Usuarios:</h3>';
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = '<p class="info">No hay API para listar usuarios. Verifica directamente en la base de datos.</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="info">No hay API para listar usuarios. Verifica directamente en phpMyAdmin.</p>';
+            }
+        }
+
+        // Ejecutar test automáticamente al cargar
+        window.onload = function() {
+            console.log('API_URL:', API_URL);
+        };
+    </script>
+</body>
+</html>

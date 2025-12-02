@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solucionar Error de Reservas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #dc3545;
+            border-bottom: 3px solid #dc3545;
+            padding-bottom: 10px;
+        }
+        .error-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .solution-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .btn {
+            display: inline-block;
+            background: #0066cc;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 5px;
+            text-align: center;
+        }
+        .btn:hover {
+            background: #0052a3;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .steps {
+            counter-reset: step-counter;
+            list-style: none;
+            padding: 0;
+        }
+        .steps li {
+            counter-increment: step-counter;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            position: relative;
+            padding-left: 60px;
+        }
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            background: #0066cc;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Solucionar Error de Reservas</h1>
+        
+        <div class="error-box">
+            <h3>❌ Error Actual:</h3>
+            <code>SQLSTATE[42S22]: Column not found: 1054 Unknown column 'servicio_id' in 'field list'</code>
+        </div>
+
+        <div class="solution-box">
+            <h2>✅ Solución Automática</h2>
+            <p><strong>Si la tabla NO existe, usa este botón:</strong></p>
+            <a href="verificar_y_crear_reservas.php" class="btn btn-success">
+                🔧 VERIFICAR Y CREAR
+            </a>
+            <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                Este script verificará y creará la tabla 'reservas' si no existe
+            </p>
+        </div>
+
+        <div class="warning">
+            <h2>⚠️ Si la tabla existe pero tiene columnas faltantes:</h2>
+            <p><strong>Usa este botón para recrear la tabla con la estructura correcta:</strong></p>
+            <a href="recrear_tabla_reservas.php" class="btn" style="background: #ffc107; color: #000;">
+                🔄 RECREAR TABLA
+            </a>
+            <p style="margin-top: 15px; font-size: 14px; color: #856404;">
+                <strong>ADVERTENCIA:</strong> Esto eliminará las reservas existentes (si las hay)
+            </p>
+        </div>
+
+        <h2>📋 Qué hace el script:</h2>
+        <ol class="steps">
+            <li>
+                <strong>Verifica si la tabla existe</strong><br>
+                Comprueba si la tabla 'reservas' está en tu base de datos
+            </li>
+            <li>
+                <strong>Crea la tabla si no existe</strong><br>
+                Si falta, la crea con todas las columnas necesarias
+            </li>
+            <li>
+                <strong>Verifica la estructura</strong><br>
+                Confirma que todas las columnas estén presentes
+            </li>
+            <li>
+                <strong>Muestra el resultado</strong><br>
+                Te indica si todo está listo para usar
+            </li>
+        </ol>
+
+        <div class="warning">
+            <h3>⚠️ Importante:</h3>
+            <ul>
+                <li>Este script NO elimina datos existentes</li>
+                <li>NO afecta tus servicios ni usuarios</li>
+                <li>Es seguro ejecutarlo múltiples veces</li>
+            </ul>
+        </div>
+
+        <h2>🧪 Después de ejecutar:</h2>
+        <ol>
+            <li>Verás un mensaje verde: "Sistema de Reservas Listo"</li>
+            <li>Vuelve a la aplicación</li>
+            <li>Inicia sesión como <strong>TURISTA</strong></li>
+            <li>Ve a la página de Inicio</li>
+            <li>Haz clic en "Reservar" en cualquier servicio</li>
+            <li>Completa el formulario</li>
+            <li>¡Debería funcionar!</li>
+        </ol>
+
+        <hr style="margin: 30px 0;">
+
+        <h2>🔍 Otras Herramientas:</h2>
+        <a href="test_mis_servicios_debug.html" class="btn">
+            🐛 Debug de Servicios
+        </a>
+        <a href="sql/crear_tabla_reservas.php" class="btn">
+            📝 Crear Solo Tabla Reservas
+        </a>
+        <a href="index.html" class="btn">
+            🏠 Volver a la Aplicación
+        </a>
+
+        <hr style="margin: 30px 0;">
+
+        <details>
+            <summary style="cursor: pointer; font-weight: bold; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+                📖 Solución Manual (Si el automático no funciona)
+            </summary>
+            <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 5px;">
+                <h3>Opción 1: Usar phpMyAdmin</h3>
+                <ol>
+                    <li>Abre phpMyAdmin</li>
+                    <li>Selecciona tu base de datos</li>
+                    <li>Ve a la pestaña "SQL"</li>
+                    <li>Copia y pega este código:</li>
+                </ol>
+                <pre style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">CREATE TABLE IF NOT EXISTS reservas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    servicio_id INT NOT NULL,
+    turista_id INT NOT NULL,
+    fecha_reserva DATE NOT NULL,
+    hora_reserva TIME,
+    numero_personas INT NOT NULL DEFAULT 1,
+    precio_total DECIMAL(10, 2),
+    estado ENUM('pendiente', 'confirmada', 'cancelada', 'completada') DEFAULT 'pendiente',
+    notas_turista TEXT,
+    notas_proveedor TEXT,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (servicio_id) REFERENCES servicios(id) ON DELETE CASCADE,
+    FOREIGN KEY (turista_id) REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;</pre>
+                <p>5. Haz clic en "Continuar"</p>
+                <p>6. Deberías ver: "1 fila afectada"</p>
+            </div>
+        </details>
+    </div>
+</body>
+</html>

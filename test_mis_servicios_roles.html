@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mis Servicios - Todos los Roles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #0066cc;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #0066cc;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+        }
+        .info {
+            border-left: 4px solid #17a2b8;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #0066cc;
+            color: white;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test: Mis Servicios por Rol</h1>
+        <p>Esta herramienta verifica que todos los roles de proveedores puedan ver sus servicios correctamente.</p>
+    </div>
+
+    <div class="container">
+        <h2>1. Ver Todos los Usuarios</h2>
+        <button onclick="verTodosUsuarios()">Ver Usuarios Registrados</button>
+        <div id="usuarios-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>2. Ver Todos los Servicios</h2>
+        <button onclick="verTodosServicios()">Ver Todos los Servicios</button>
+        <div id="servicios-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>3. Probar API Mis Servicios</h2>
+        <div class="input-group">
+            <label>ID de Usuario:</label>
+            <input type="number" id="usuario-id" placeholder="Ej: 1">
+            <button onclick="probarMisServicios()">Probar API</button>
+        </div>
+        <div id="mis-servicios-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>4. Verificar por Tipo de Usuario</h2>
+        <button onclick="verificarPorTipo('hotel')">Hospedaje</button>
+        <button onclick="verificarPorTipo('restaurante')">Restaurante</button>
+        <button onclick="verificarPorTipo('operador')">Operador Turistico</button>
+        <button onclick="verificarPorTipo('agencia')">Agencia</button>
+        <div id="tipo-result" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/zipaquira-turismo/api';
+
+        async function verTodosUsuarios() {
+            const resultDiv = document.getElementById('usuarios-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p>Cargando usuarios...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/usuarios/listar_todos.php`);
+                
+                if (!response.ok) {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<p><strong>Error HTTP:</strong> ${response.status}</p>
+                        <p>La API listar_todos.php no existe. Mostrando usuarios desde servicios...</p>`;
+                    
+                    // Alternativa: obtener usuarios desde servicios
+                    const serviciosResp = await fetch(`${API_URL}/servicios/listar.php`);
+                    const serviciosData = await serviciosResp.json();
+                    
+                    if (serviciosData.success) {
+                        const usuarios = {};
+                        serviciosData.data.forEach(s => {
+                            if (!usuarios[s.usuario_id]) {
+                                usuarios[s.usuario_id] = {
+                                    id: s.usuario_id,
+                                    nombre: s.propietario || 'N/A',
+                                    tipo: s.tipo_servicio,
+                                    servicios: 0
+                                };
+                            }
+                            usuarios[s.usuario_id].servicios++;
+                        });
+                        
+                        let html = '<table><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Servicios</th><th>Accion</th></tr>';
+                        Object.values(usuarios).forEach(u => {
+                            html += `<tr>
+                                <td>${u.id}</td>
+                                <td>${u.nombre}</td>
+                                <td>${u.tipo}</td>
+                                <td>${u.servicios}</td>
+                                <td><button onclick="document.getElementById('usuario-id').value=${u.id}; probarMisServicios()">Probar</button></td>
+                            </tr>`;
+                        });
+                        html += '</table>';
+                        resultDiv.innerHTML += html;
+                    }
+                    return;
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    let html = '<p><strong>Usuarios encontrados:</strong> ' + data.total + '</p>';
+                    html += '<table><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Tipo</th><th>Accion</th></tr>';
+                    data.data.forEach(u => {
+                        html += `<tr>
+                            <td>${u.id}</td>
+                            <td>${u.nombre_completo}</td>
+                            <td>${u.email}</td>
+                            <td>${u.tipo_usuario}</td>
+                            <td><button onclick="document.getElementById('usuario-id').value=${u.id}; probarMisServicios()">Probar</button></td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = '<p><strong>Error:</strong> ' + data.message + '</p>';
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<p><strong>Error:</strong> ' + error.message + '</p>';
+            }
+        }
+
+        async function verTodosServicios() {
+            const resultDiv = document.getElementById('servicios-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p>Cargando servicios...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/servicios/listar.php`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    let html = '<p><strong>Servicios encontrados:</strong> ' + data.total + '</p>';
+                    html += '<table><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Usuario ID</th><th>Propietario</th></tr>';
+                    data.data.forEach(s => {
+                        html += `<tr>
+                            <td>${s.id}</td>
+                            <td>${s.nombre_servicio}</td>
+                            <td>${s.tipo_servicio}</td>
+                            <td>${s.usuario_id}</td>
+                            <td>${s.propietario || 'N/A'}</td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = '<p><strong>Error:</strong> ' + data.message + '</p>';
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<p><strong>Error:</strong> ' + error.message + '</p>';
+            }
+        }
+
+        async function probarMisServicios() {
+            const usuarioId = document.getElementById('usuario-id').value;
+            const resultDiv = document.getElementById('mis-servicios-result');
+            
+            if (!usuarioId) {
+                alert('Por favor ingresa un ID de usuario');
+                return;
+            }
+
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p>Consultando servicios del usuario ' + usuarioId + '...</p>';
+
+            try {
+                const url = `${API_URL}/servicios/mis_servicios.php?usuario_id=${usuarioId}`;
+                console.log('URL:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                console.log('Respuesta:', data);
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    let html = '<p><strong>Servicios del usuario ' + usuarioId + ':</strong> ' + data.total + '</p>';
+                    
+                    if (data.total > 0) {
+                        html += '<table><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>RNT</th><th>Activo</th></tr>';
+                        data.data.forEach(s => {
+                            html += `<tr>
+                                <td>${s.id}</td>
+                                <td>${s.nombre_servicio}</td>
+                                <td>${s.tipo_servicio}</td>
+                                <td>${s.rnt}</td>
+                                <td>${s.activo ? 'Si' : 'No'}</td>
+                            </tr>`;
+                        });
+                        html += '</table>';
+                    } else {
+                        html += '<p class="info">Este usuario no tiene servicios registrados.</p>';
+                    }
+                    
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = '<p><strong>Error:</strong> ' + data.message + '</p>';
+                    resultDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<p><strong>Error:</strong> ' + error.message + '</p>';
+            }
+        }
+
+        async function verificarPorTipo(tipo) {
+            const resultDiv = document.getElementById('tipo-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p>Verificando servicios de tipo: ' + tipo + '...</p>';
+
+            try {
+                // Primero obtener todos los servicios
+                const response = await fetch(`${API_URL}/servicios/listar.php`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Filtrar por tipo
+                    const serviciosTipo = data.data.filter(s => s.tipo_servicio === tipo);
+                    
+                    resultDiv.className = 'result info';
+                    let html = '<p><strong>Servicios de tipo "' + tipo + '":</strong> ' + serviciosTipo.length + '</p>';
+                    
+                    if (serviciosTipo.length > 0) {
+                        // Agrupar por usuario
+                        const porUsuario = {};
+                        serviciosTipo.forEach(s => {
+                            if (!porUsuario[s.usuario_id]) {
+                                porUsuario[s.usuario_id] = {
+                                    usuario_id: s.usuario_id,
+                                    propietario: s.propietario,
+                                    servicios: []
+                                };
+                            }
+                            porUsuario[s.usuario_id].servicios.push(s);
+                        });
+                        
+                        html += '<h3>Usuarios con servicios de este tipo:</h3>';
+                        Object.values(porUsuario).forEach(u => {
+                            html += `<div style="margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 4px;">
+                                <p><strong>Usuario ID:</strong> ${u.usuario_id} - ${u.propietario || 'N/A'}</p>
+                                <p><strong>Servicios:</strong> ${u.servicios.length}</p>
+                                <button onclick="document.getElementById('usuario-id').value=${u.usuario_id}; probarMisServicios()">
+                                    Probar API para este usuario
+                                </button>
+                                <ul>`;
+                            u.servicios.forEach(s => {
+                                html += `<li>${s.nombre_servicio} (ID: ${s.id})</li>`;
+                            });
+                            html += '</ul></div>';
+                        });
+                    } else {
+                        html += '<p class="info">No hay servicios de este tipo registrados.</p>';
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = '<p><strong>Error:</strong> ' + data.message + '</p>';
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<p><strong>Error:</strong> ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

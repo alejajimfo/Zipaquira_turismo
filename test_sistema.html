@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test del Sistema - Zipaquirá Turística</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0052a3; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        h1 { color: #0066cc; }
+        h2 { color: #333; border-bottom: 2px solid #0066cc; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test del Sistema - Zipaquirá Turística</h1>
+    <p>Herramienta unificada para probar todas las funcionalidades del sistema.</p>
+
+    <div class="test-box">
+        <h2>1. Test de Conexión</h2>
+        <button onclick="testConexion()">Probar Conexión</button>
+        <div id="result-conexion"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>2. Test de Servicios</h2>
+        <label>Usuario ID: </label>
+        <input type="number" id="usuario_id" value="4" min="1">
+        <button onclick="testMisServicios()">Ver Mis Servicios</button>
+        <button onclick="testListarServicios()">Ver Todos los Servicios</button>
+        <div id="result-servicios"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>3. Test de Reservas</h2>
+        <label>Servicio ID: </label>
+        <input type="number" id="servicio_id" value="1" min="1">
+        <label>Turista ID: </label>
+        <input type="number" id="turista_id" value="1" min="1">
+        <button onclick="testCrearReserva()">Crear Reserva de Prueba</button>
+        <button onclick="testListarReservas()">Ver Reservas</button>
+        <div id="result-reservas"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>4. Verificar Base de Datos</h2>
+        <button onclick="window.open('verificar_tabla_servicios.php', '_blank')">Ver Estructura de Tablas</button>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/zipaquira-turismo/api';
+
+        async function testConexion() {
+            const resultDiv = document.getElementById('result-conexion');
+            resultDiv.innerHTML = '<p>⏳ Probando...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/servicios/listar.php`);
+                const data = await response.json();
+                resultDiv.innerHTML = `<p class="success">✅ Conexión exitosa - ${data.total} servicios en BD</p>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testMisServicios() {
+            const usuario_id = document.getElementById('usuario_id').value;
+            const resultDiv = document.getElementById('result-servicios');
+            resultDiv.innerHTML = '<p>⏳ Cargando...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/servicios/mis_servicios.php?usuario_id=${usuario_id}`);
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <p class="success">✅ ${data.total} servicios encontrados</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testListarServicios() {
+            const resultDiv = document.getElementById('result-servicios');
+            resultDiv.innerHTML = '<p>⏳ Cargando...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/servicios/listar.php`);
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <p class="success">✅ ${data.total} servicios totales</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testCrearReserva() {
+            const resultDiv = document.getElementById('result-reservas');
+            resultDiv.innerHTML = '<p>⏳ Creando reserva...</p>';
+
+            const payload = {
+                servicio_id: parseInt(document.getElementById('servicio_id').value),
+                turista_id: parseInt(document.getElementById('turista_id').value),
+                fecha_reserva: new Date().toISOString().split('T')[0],
+                numero_personas: 2,
+                precio_total: 100000
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/reservas/crear.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Reserva creada con ID: ${data.reserva_id}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">❌ ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testListarReservas() {
+            const turista_id = document.getElementById('turista_id').value;
+            const resultDiv = document.getElementById('result-reservas');
+            resultDiv.innerHTML = '<p>⏳ Cargando reservas...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/reservas/mis_reservas.php?turista_id=${turista_id}`);
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <p class="success">✅ ${data.total} reservas encontradas</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        window.addEventListener('load', () => {
+            console.log('🧪 Test del sistema cargado');
+            console.log('API_URL:', API_URL);
+        });
+    </script>
+</body>
+</html>
